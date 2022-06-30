@@ -21,9 +21,18 @@ endif
 #################################################################################
 
 ## Install Python Dependencies
+setup:
+	python3 -m venv ../.MLOPS_PSET2_Sangeeth
+	# source ../.MLOpsDagsHubDemo/bin/activate
 requirements: test_environment
+	pip install --upgrade pip &&\
 	$(PYTHON_INTERPRETER) -m pip install -U pip setuptools wheel
+	pip install gitdb2==2.0.6
+	pip install GitPython==2.1.14
 	$(PYTHON_INTERPRETER) -m pip install -r requirements.txt
+
+
+
 
 ## Make Dataset
 data: requirements

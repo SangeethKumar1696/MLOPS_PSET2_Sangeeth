@@ -1,0 +1,4 @@
+[core]
+    autostage = true
+['remote "origin"']
+    url = https://dagshub.com/SangeethKumar1696/MLOPS_PSET2_Sangeeth.dvc
