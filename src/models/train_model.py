@@ -1,78 +1,40 @@
-# The data set used in this example is from http://archive.ics.uci.edu/ml/datasets/Wine+Quality
-
-#from curses import raw
-import os
-import warnings
-import sys
-
+import pickle
 import pandas as pd
-import numpy as np
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import ElasticNet
-from urllib.parse import urlparse
-import mlflow
-import mlflow.sklearn
-import logging
+import yaml
+from sklearn.linear_model import ElasticNet, LogisticRegression
+from sklearn.ensemble import RandomForestRegressor
+
+from config import Config
+
+Config.MODELS_PATH.mkdir(parents=True, exist_ok=True)
+
+with open ("params.yaml", "r") as fd:
+    params = yaml.safe_load(fd)
+
+model_type = params['model_type']
+lr = params['lr']
+random_state = params['random_state']
+#epochs = params['train']['epochs']
+alpha = params['train']['alpha']
+l1_rate = params['train']['l1_rate']
 
 
-mlflow.set_tracking_uri("https://dagshub.com/SangeethKumar1696/MLOPS_PSET2_Sangeeth.mlflow")
-tracking_uri = mlflow.get_tracking_uri()
-print("Current tracking uri: {}".format(tracking_uri))
+X_train = pd.read_csv(str(Config.FEATURES_PATH / "train_features.csv"))
+y_train = pd.read_csv(str(Config.FEATURES_PATH / "train_labels.csv"))
 
+if model_type == "LogisticRegression":
+    model = LogisticRegression(l1_ratio=l1_rate, random_state=random_state)
 
-logging.basicConfig(level=logging.WARN)
-logger = logging.getLogger(__name__)
+if model_type == "RandomForestRegressor":
+    model = RandomForestRegressor(
+        n_estimators=150, max_depth=6, random_state=random_state
+    )
 
-def eval_metrics(actual, pred):
-    rmse = np.sqrt(mean_squared_error(actual, pred))
-    mae = mean_absolute_error(actual, pred)
-    r2 = r2_score(actual, pred)
-    return rmse, mae, r2
+if model_type == "ElasticNet":
+    model = ElasticNet(
+        alpha=alpha, l1_ratio=l1_rate, random_state=random_state
+        )
 
+model.fit(X_train, y_train)
 
-if __name__ == "__main__":
-    #warnings.filterwarnings("ignore")
-    #np.random.seed(40)
-
-    dat = pd.read_csv("data/raw/wine-quality.csv", sep = ';')
-    #print(dat.head(10))
-    #print(dat.columns)
-
-    # Split the data into training and test sets. (0.75, 0.25) split.
-    train, test = train_test_split(dat)
-    #print(train.head(10))
-     
-     #The predicted column is "quality" which is a scalar from [3, 9]
-    train_x = train.drop(["quality"], axis=1)
-    test_x = test.drop(["quality"], axis=1)
-    train_y = train[["quality"]]
-    test_y = test[["quality"]]
-
-
-    alpha = float(sys.argv[1]) if len(sys.argv) > 1 else 0.5
-    l1_ratio = float(sys.argv[2]) if len(sys.argv) > 2 else 0.5
-
-    with mlflow.start_run():
-        lr = ElasticNet(alpha=alpha, l1_ratio=l1_ratio, random_state=42)
-        lr.fit(train_x, train_y)
-
-        predicted_qualities = lr.predict(test_x)
-
-        (rmse, mae, r2) = eval_metrics(test_y, predicted_qualities)
-
-        print("Elasticnet model (alpha=%f, l1_ratio=%f):" % (alpha, l1_ratio))
-        print("  RMSE: %s" % rmse)
-        print("  MAE: %s" % mae)
-        print("  R2: %s" % r2)
-
-        mlflow.log_param("alpha", alpha)
-        mlflow.log_param("l1_ratio", l1_ratio)
-        mlflow.log_metric("rmse", rmse)
-        mlflow.log_metric("r2", r2)
-        mlflow.log_metric("mae", mae)
-
-        # tracking_url_type_store = urlparse(mlflow.get_tracking_uri()).scheme
-
-        # Model registry 
-        mlflow.sklearn.log_model(lr, "model")
+pickle.dump(model, open(str(Config.MODELS_PATH / "model.pickle"), "wb"))
