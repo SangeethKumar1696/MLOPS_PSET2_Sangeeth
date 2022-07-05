@@ -38,16 +38,16 @@ stages:
       size: 1153
     params:
       params.yaml:
-        model_type: ElasticNet
+        model_type: RandomForestRegressor
         random_state: 42
         train:
-          epochs: 70
+          epochs: 100
           alpha: 0.1
-          l1_rate: 0.5
+          l1_rate: 0.6
     outs:
     - path: assets/models
-      md5: 2d2ac68c2d17f6129875a1c7d2ca8b96.dir
-      size: 814
+      md5: 0cb341ba569ac6c9f6f383af8719c757.dir
+      size: 154881
       nfiles: 1
   evaluate:
     cmd: python src/models/evaluate_model.py
@@ -57,16 +57,16 @@ stages:
       size: 6428
       nfiles: 4
     - path: assets/models
-      md5: 2d2ac68c2d17f6129875a1c7d2ca8b96.dir
-      size: 814
+      md5: 0cb341ba569ac6c9f6f383af8719c757.dir
+      size: 154881
       nfiles: 1
     - path: src/models/evaluate_model.py
       md5: 12f44c1aefdc3182cfd81076d32f8781
       size: 1927
     params:
       params.yaml:
-        model_type: ElasticNet
+        model_type: RandomForestRegressor
     outs:
     - path: assets/metrics.json
-      md5: 93e2f12bc2d04bb78de49f799e899597
-      size: 83
+      md5: 4db8df15f435d9339bacb8cbcb713e0e
+      size: 36

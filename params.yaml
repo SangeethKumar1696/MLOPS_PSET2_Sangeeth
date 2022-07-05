@@ -1,9 +1,9 @@
-model_type: ElasticNet
-lr: 0.0041
+model_type: RandomForestRegressor
+lr: 0.0021
 random_state: 42
 
 train:
-  epochs: 70
+  epochs: 100
   alpha: 0.1
-  l1_rate: 0.5
+  l1_rate: 0.6
   
