@@ -1,0 +1,36 @@
+stages:
+  prepare:
+    cmd: python src/data/create_dataset.py
+    deps:
+    - src/data/create_dataset.py
+    outs:
+    - assets/data
+  featurize:
+    cmd: python src/features/create_features.py
+    deps:
+    - assets/data
+    - src/features/create_features.py
+    outs:
+    - assets/features
+  train:
+    cmd: python src/models/train_model.py
+    deps:
+    - assets/features
+    - src/models/train_model.py
+    params:
+    - model_type
+    - random_state
+    - train
+    outs:
+    - assets/models
+  evaluate:
+    cmd: python src/models/evaluate_model.py
+    deps:
+    - assets/features
+    - assets/models
+    - src/models/evaluate_model.py
+    params:
+    - model_type
+    metrics:
+    - assets/metrics.json:
+        cache: false

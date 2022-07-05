@@ -1,0 +1,72 @@
+schema: '2.0'
+stages:
+  prepare:
+    cmd: python src/data/create_dataset.py
+    deps:
+    - path: src/data/create_dataset.py
+      md5: 8db0594767ebed08f96d893b9c38d4f1
+      size: 650
+    outs:
+    - path: assets/data
+      md5: 0934408ed544a61a2536499dcc4f67f9.dir
+      size: 92145
+      nfiles: 2
+  featurize:
+    cmd: python src/features/create_features.py
+    deps:
+    - path: assets/data
+      md5: 0934408ed544a61a2536499dcc4f67f9.dir
+      size: 92145
+      nfiles: 2
+    - path: src/features/create_features.py
+      md5: d80af49d934e83e11d2f16ac83a83818
+      size: 1228
+    outs:
+    - path: assets/features
+      md5: 743808c1a0f95c79210f6492f7c63c47.dir
+      size: 6428
+      nfiles: 4
+  train:
+    cmd: python src/models/train_model.py
+    deps:
+    - path: assets/features
+      md5: 743808c1a0f95c79210f6492f7c63c47.dir
+      size: 6428
+      nfiles: 4
+    - path: src/models/train_model.py
+      md5: ffb686f9fa837cf70b46226b6af1da71
+      size: 1153
+    params:
+      params.yaml:
+        model_type: ElasticNet
+        random_state: 42
+        train:
+          epochs: 70
+          alpha: 0.01
+          l1_rate: 0.5
+    outs:
+    - path: assets/models
+      md5: 47e5c5b56a28c248a419b311d0c4ceff.dir
+      size: 814
+      nfiles: 1
+  evaluate:
+    cmd: python src/models/evaluate_model.py
+    deps:
+    - path: assets/features
+      md5: 743808c1a0f95c79210f6492f7c63c47.dir
+      size: 6428
+      nfiles: 4
+    - path: assets/models
+      md5: 47e5c5b56a28c248a419b311d0c4ceff.dir
+      size: 814
+      nfiles: 1
+    - path: src/models/evaluate_model.py
+      md5: 12f44c1aefdc3182cfd81076d32f8781
+      size: 1927
+    params:
+      params.yaml:
+        model_type: ElasticNet
+    outs:
+    - path: assets/metrics.json
+      md5: 840ee7b87fe89400ba1411d6fb276da1
+      size: 83
