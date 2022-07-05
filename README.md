@@ -6,52 +6,68 @@ PSET2 MLOPS
 Project Organization
 ------------
 
-    ├── LICENSE
-    ├── Makefile           <- Makefile with commands like `make data` or `make train`
-    ├── README.md          <- The top-level README for developers using this project.
-    ├── data
-    │   ├── external       <- Data from third party sources.
-    │   ├── interim        <- Intermediate data that has been transformed.
-    │   ├── processed      <- The final, canonical data sets for modeling.
-    │   └── raw            <- The original, immutable data dump.
-    │
-    ├── docs               <- A default Sphinx project; see sphinx-doc.org for details
-    │
-    ├── models             <- Trained and serialized models, model predictions, or model summaries
-    │
-    ├── notebooks          <- Jupyter notebooks. Naming convention is a number (for ordering),
-    │                         the creator's initials, and a short `-` delimited description, e.g.
-    │                         `1.0-jqp-initial-data-exploration`.
-    │
-    ├── references         <- Data dictionaries, manuals, and all other explanatory materials.
-    │
-    ├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
-    │   └── figures        <- Generated graphics and figures to be used in reporting
-    │
-    ├── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
-    │                         generated with `pip freeze > requirements.txt`
-    │
-    ├── setup.py           <- makes project pip installable (pip install -e .) so src can be imported
-    ├── src                <- Source code for use in this project.
-    │   ├── __init__.py    <- Makes src a Python module
-    │   │
-    │   ├── data           <- Scripts to download or generate data
-    │   │   └── make_dataset.py
-    │   │
-    │   ├── features       <- Scripts to turn raw data into features for modeling
-    │   │   └── build_features.py
-    │   │
-    │   ├── models         <- Scripts to train models and then use trained models to make
-    │   │   │                 predictions
-    │   │   ├── predict_model.py
-    │   │   └── train_model.py
-    │   │
-    │   └── visualization  <- Scripts to create exploratory and results oriented visualizations
-    │       └── visualize.py
-    │
-    └── tox.ini            <- tox file with settings for running tox; see tox.readthedocs.io
-
+LICENSE
+Makefile             <- Used to install the dependencies
+README.md            <- Top level Readme file
+assets
+   |-- .gitignore
+   |-- metrics.json  <-  Gives the metrics of the executed model i.e the value of rmse, mae and r2
+data
+   |-- .gitignore
+   |-- external
+   |   |-- .gitkeep
+   |-- processed
+   |   |-- .gitkeep
+   |-- raw.dvc        <- Used to track the changes in the data by git
+dvc.lock              <- Used by the DVC to detect when the stages or their dependencies have changed
+dvc.yaml              <- Used to define the pipelines that runs when the dvc repro command is used after the initial run
+params.yaml           <- Used to defining the parameters required for training the model and testing purposes
+requirements.txt      <- Required for installing the necessary packages to run the ML model
+src
+   |-- data
+   |   |-- .gitkeep
+   |   |-- config.py  <- Used to configure the dataset paths that are required in the next step
+   |   |-- create_dataset.py <- This is used to split the given dataset wine-quality.csv into train and test dataset and this is further used for training and testing the model.
+   |-- features
+   |   |-- .gitkeep
+   |   |-- config.py  <- Used to configure the paths that are required in the next step
+   |   |-- create_features.py <- Extracts the features and the labels required for the training step
+   |-- models
+   |   |-- .1.gitkeep
+   |   |-- .gitkeep
+   |   |-- config.py   <- Used to configure the paths that are required in the next step 
+   |   |-- evaluate_model.py <- Used to evaluate the model by the given parameters in the params.yaml file
+   |   |-- train_model.py   <- Used to train the model based on the parameters specified in the params.yaml file and saves the model.pkl file
 
 --------
 
-<p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
+Steps to be followed
+---------------------
+
+Step 1: Create Git repo create DagsHub repo: https://dagshub.com
+Step 2: install DVC dvc init configure dvc: 
+        dvc remote add origin https://dagshub.com/SangeethKumar1696/MLOPS_PSET2_Sangeeth.dvc 
+        dvc remote modify origin --local auth basic 
+        dvc remote modify origin --local user SangeethKumar1696  
+        dvc remote modify origin --local password $DAGSHUB_TOKEN
+        dvc pull -r origin
+        dvc add data/raw
+        dvc push -r origin    
+Step 3: DVC run once all the necessary files for training and testing of models are created
+        dvc run -f -n prepare -d src/data/create_dataset.py -o assets/data python src/data/create_dataset.py
+        dvc run -f -n featurize -d src/features/create_features.py -d assets/data -o assets/features python src/features/create_features.py
+        dvc run -f -n evaluate -d src/models/evaluate_model.py -d assets/features -d assets/models -p model_type -M assets/metrics.json python src/models/evaluate_model.py
+        
+        Running the aboce steps creates up the dvc.yaml file with the updated stages/pipelines
+        From the next time, "dvc repro" command would be sufficient when the model parameters/datasets get updated
+Step 4 : To commit the updates to the git.
+        git add
+        git commit
+        git push
+Step5   : ML flow based tracking
+        mlflow.set_tracking_uri("https://dagshub.com/SangeethKumar1696/MLOPS_PSET2_Sangeeth.mlflow") tracking_uri = mlflow.get_tracking_uri() print("Current tracking uri: {}".format(tracking_uri))
+
+
+
+
+<p><small>Project based on the <a target="_blank" href="https<-//drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
