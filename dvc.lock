@@ -38,16 +38,16 @@ stages:
       size: 1153
     params:
       params.yaml:
-        model_type: RandomForestRegressor
+        model_type: LogisticRegression
         random_state: 42
         train:
           epochs: 100
-          alpha: 0.1
-          l1_rate: 0.6
+          alpha: 0.01
+          l1_rate: 0.5
     outs:
     - path: assets/models
-      md5: 0cb341ba569ac6c9f6f383af8719c757.dir
-      size: 154881
+      md5: 11047f0fcc130c9f9d87e408d639edd4.dir
+      size: 1095
       nfiles: 1
   evaluate:
     cmd: python src/models/evaluate_model.py
@@ -57,16 +57,16 @@ stages:
       size: 6428
       nfiles: 4
     - path: assets/models
-      md5: 0cb341ba569ac6c9f6f383af8719c757.dir
-      size: 154881
+      md5: 11047f0fcc130c9f9d87e408d639edd4.dir
+      size: 1095
       nfiles: 1
     - path: src/models/evaluate_model.py
       md5: 12f44c1aefdc3182cfd81076d32f8781
       size: 1927
     params:
       params.yaml:
-        model_type: RandomForestRegressor
+        model_type: LogisticRegression
     outs:
     - path: assets/metrics.json
-      md5: 4db8df15f435d9339bacb8cbcb713e0e
-      size: 36
+      md5: b7856d61ba1c475c233b1ba09542ac9e
+      size: 68
