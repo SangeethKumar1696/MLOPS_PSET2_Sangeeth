@@ -4,6 +4,6 @@ random_state: 42
 
 train:
   epochs: 70
-  alpha: 0.01
+  alpha: 0.1
   l1_rate: 0.5
   
